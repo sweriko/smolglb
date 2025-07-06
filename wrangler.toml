@@ -1,0 +1,9 @@
+name = "smol-textures"
+main = "src/worker.ts"
+compatibility_date = "2023-11-21"
+
+[vars]
+# Add any environment variables here
+
+[env.production]
+name = "smol-textures" 

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>smol textures</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
+        body {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-[#F0F0F0] min-h-screen p-4 sm:p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="relative bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-4 sm:p-6 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-black">smol</h1>
+                        <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-black">
+                            TEXTURES
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                    <div class="relative w-full sm:w-56 lg:w-64">
+                        <input 
+                            type="password" 
+                            id="apiKey" 
+                            class="w-full border-black border-2 p-2.5 sm:p-3 focus:outline-none focus:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:shadow-[4px_4px_0px_rgba(0,0,0,1)] font-mono text-sm"
+                        >
+                        <div id="customPlaceholder" class="absolute top-1/2 transform -translate-y-1/2 left-2.5 sm:left-3 text-sm text-gray-400 font-mono pointer-events-none">
+                            Enter API key, get it <a href="https://tinify.com/developers" target="_blank" class="text-[#6C5CE7] underline hover:text-[#5a4fcf] pointer-events-auto">here</a>
+                        </div>
+                    </div>
+                    <button 
+                        id="saveApiKey"
+                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-black border-2 bg-[#00B894] hover:bg-[#00a085] hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:bg-[#008f72] font-bold text-white transition-all duration-150 text-sm sm:text-base"
+                    >
+                        SAVE KEY
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Texture Optimization Controls -->
+        <div class="mb-6">
+            <div class="bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-4 sm:p-6 mb-4">
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-sm sm:text-base font-bold text-black">TEXTURE OPTIMIZATION:</span>
+                    </div>
+                    
+                    <!-- Format Selection -->
+                    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-black">FORMAT:</span>
+                        </div>
+                        <select id="targetFormat" class="px-3 py-2 border-2 border-black bg-white font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                            <option value="compress">Keep Original (Compress Only)</option>
+                            <option value="image/png">PNG</option>
+                            <option value="image/jpeg">JPEG</option>
+                            <option value="image/webp">WebP</option>
+                            <option value="image/avif">AVIF</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Resize Options -->
+                    <div class="flex flex-col gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-black">RESIZE:</span>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="flex gap-2">
+                                <button id="resize50" class="px-3 py-2 border-2 border-black bg-[#FFF5B4] hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">50%</button>
+                                <button id="resize75" class="px-3 py-2 border-2 border-black bg-[#FFF5B4] hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">75%</button>
+                                <button id="resize100" class="px-3 py-2 border-2 border-black bg-[#E17055] hover:bg-[#d63031] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-white text-sm transition-all duration-150 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <div class="flex gap-2 items-center">
+                                <input type="number" id="customWidth" placeholder="Width" class="w-20 px-2 py-2 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                <span class="text-sm font-bold">×</span>
+                                <input type="number" id="customHeight" placeholder="Height" class="w-20 px-2 py-2 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                <button id="aspectRatioLock" class="w-8 h-8 border-2 border-black bg-[#6C5CE7] hover:bg-[#5a4fcf] rounded-md flex items-center justify-center transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M6 10v-4a6 6 0 1 1 12 0v4"/>
+                                        <rect x="2" y="10" width="20" height="10" rx="2" ry="2"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drop Zone -->
+        <div 
+            id="dropZone"
+            class="relative bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-8 sm:p-12 mb-6 cursor-pointer transition-all duration-150 hover:shadow-[12px_12px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px]"
+        >
+            <div class="text-center">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-[#6C5CE7] border-2 border-black rounded-lg mx-auto mb-4 sm:mb-6 flex items-center justify-center">
+                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17,8 12,3 7,8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                </div>
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-black text-black mb-2">DROP YOUR GLB MODELS HERE</h2>
+                <p class="text-xs sm:text-sm font-medium text-gray-600">GLB files • Up to 100MB</p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".glb" class="absolute inset-0 opacity-0 cursor-pointer">
+        </div>
+
+        <!-- Processing Queue -->
+        <div id="queueSection" class="bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-4 sm:p-6">
+            <div class="flex items-center gap-3 mb-4 sm:mb-6">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-[#FF8C42] border-2 border-black rounded-md flex items-center justify-center">
+                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4,6V8H20V6H4M4,10V12H20V10H4M4,14V16H20V14H4M4,18V20H20V18H4Z"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-black text-black">PROCESSING QUEUE</h2>
+            </div>
+            
+            <div id="queueContainer" class="flex flex-col gap-3 sm:gap-4">
+                <!-- Processed models will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
