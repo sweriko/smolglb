@@ -5,7 +5,7 @@ class SmolTextures {
         this.processingQueue = new Map();
         this.aspectRatioLocked = true;
         this.currentAspectRatio = null;
-        this.resizePercentage = null; // No default resize
+        this.resizeResolution = null; // No default resize
         this.textureOptimizationEnabled = true; // Enabled by default
         this.meshOptimizationEnabled = false;
         this.meshRatio = 0.75;
@@ -44,19 +44,38 @@ class SmolTextures {
             this.saveApiKey();
         });
 
+        // Expandable API key fallback banner
+        const noApiKeyBanner = document.getElementById('noApiKeyBanner');
+        const expandedExplanation = document.getElementById('expandedExplanation');
+        const expandArrow = document.getElementById('expandArrow');
+        
+        noApiKeyBanner.addEventListener('click', () => {
+            const isExpanded = !expandedExplanation.classList.contains('hidden');
+            
+            if (isExpanded) {
+                // Collapse
+                expandedExplanation.classList.add('hidden');
+                expandArrow.classList.remove('rotate-180');
+            } else {
+                // Expand
+                expandedExplanation.classList.remove('hidden');
+                expandArrow.classList.add('rotate-180');
+            }
+        });
+
         // Resizer controls
-        const resize25Btn = document.getElementById('resize25');
-        const resize50Btn = document.getElementById('resize50');
+        const resize512Btn = document.getElementById('resize512');
+        const resize1024Btn = document.getElementById('resize1024');
         const customWidthInput = document.getElementById('customWidth');
         const customHeightInput = document.getElementById('customHeight');
         const aspectRatioLockBtn = document.getElementById('aspectRatioLock');
 
-        resize25Btn.addEventListener('click', () => {
-            this.setResizePreset(25);
+        resize512Btn.addEventListener('click', () => {
+            this.setResizePreset(512);
         });
 
-        resize50Btn.addEventListener('click', () => {
-            this.setResizePreset(50);
+        resize1024Btn.addEventListener('click', () => {
+            this.setResizePreset(1024);
         });
 
         customWidthInput.addEventListener('input', (e) => {
@@ -163,79 +182,42 @@ class SmolTextures {
         });
     }
 
-    setResizePreset(percentage) {
+    setResizePreset(resolution) {
         const customWidth = document.getElementById('customWidth');
         const customHeight = document.getElementById('customHeight');
-        const resize25Btn = document.getElementById('resize25');
-        const resize50Btn = document.getElementById('resize50');
-        const aspectRatioLock = document.getElementById('aspectRatioLock');
+        const resize512Btn = document.getElementById('resize512');
+        const resize1024Btn = document.getElementById('resize1024');
         
         // Check if clicking the same preset to deactivate it
-        if (this.resizePercentage === percentage) {
+        if (this.resizeResolution === resolution) {
             // Deactivate - reset to no preset selected
-            this.resizePercentage = null;
+            this.resizeResolution = null;
             
             // Reset both buttons to white
-            resize25Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
-            resize50Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
+            resize512Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
+            resize1024Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
             
-            // Reset inputs to disabled state
+            // Clear inputs
             customWidth.value = '';
             customHeight.value = '';
-            customWidth.placeholder = 'Width';
-            customHeight.placeholder = 'Height';
-            customWidth.disabled = true;
-            customHeight.disabled = true;
-            aspectRatioLock.disabled = true;
-            
-            // Reset styles to disabled
-            customWidth.className = 'w-20 px-2 py-1.5 border-2 border-gray-400 bg-gray-100 text-gray-500 font-mono text-sm cursor-not-allowed';
-            customHeight.className = 'w-20 px-2 py-1.5 border-2 border-gray-400 bg-gray-100 text-gray-500 font-mono text-sm cursor-not-allowed';
-            aspectRatioLock.className = 'w-7 h-7 border-2 border-gray-400 bg-gray-200 rounded-md flex items-center justify-center cursor-not-allowed';
-            
-            // Reset times symbol
-            const timesSymbol = customWidth.parentNode.querySelector('span');
-            if (timesSymbol) {
-                timesSymbol.className = 'text-sm font-bold text-gray-400';
-            }
             
             return;
         }
         
-        // Clear custom inputs to indicate preset is active
-        customWidth.value = '';
-        customHeight.value = '';
-        
-        // Enable inputs
-        customWidth.disabled = false;
-        customHeight.disabled = false;
-        aspectRatioLock.disabled = false;
+        // Set both inputs to the resolution value (square preset)
+        customWidth.value = resolution;
+        customHeight.value = resolution;
         
         // Update button states
-        if (percentage === 25) {
-            resize25Btn.className = 'px-3 py-1.5 border-2 border-black bg-[#FFEB3B] hover:bg-[#FDD835] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
-            resize50Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
-            customWidth.placeholder = '25%';
-            customHeight.placeholder = '25%';
-        } else if (percentage === 50) {
-            resize25Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
-            resize50Btn.className = 'px-3 py-1.5 border-2 border-black bg-[#FFEB3B] hover:bg-[#FDD835] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
-            customWidth.placeholder = '50%';
-            customHeight.placeholder = '50%';
+        if (resolution === 512) {
+            resize512Btn.className = 'px-3 py-1.5 border-2 border-black bg-[#FFEB3B] hover:bg-[#FDD835] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
+            resize1024Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
+        } else if (resolution === 1024) {
+            resize512Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
+            resize1024Btn.className = 'px-3 py-1.5 border-2 border-black bg-[#FFEB3B] hover:bg-[#FDD835] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
         }
         
-        // Update input styles
-        customWidth.className = 'w-20 px-2 py-1.5 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
-        customHeight.className = 'w-20 px-2 py-1.5 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
-        aspectRatioLock.className = 'w-7 h-7 border-2 border-black bg-[#6C5CE7] hover:bg-[#5a4fcf] rounded-md flex items-center justify-center transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
-        
-        // Update times symbol
-        const timesSymbol = customWidth.parentNode.querySelector('span');
-        if (timesSymbol) {
-            timesSymbol.className = 'text-sm font-bold text-black';
-        }
-        
-        this.resizePercentage = percentage;
+        this.resizeResolution = resolution;
     }
 
     handleCustomDimensionChange(dimension, value) {
@@ -244,34 +226,25 @@ class SmolTextures {
         
         // Clear preset selection when custom values are entered
         if (value) {
-            const resize25Btn = document.getElementById('resize25');
-            const resize50Btn = document.getElementById('resize50');
+            const resize512Btn = document.getElementById('resize512');
+            const resize1024Btn = document.getElementById('resize1024');
             
-            // Reset percentage buttons to default white state
-            resize25Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
-            resize50Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
+            // Reset resolution buttons to default white state
+            resize512Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
+            resize1024Btn.className = 'px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150';
             
-            customWidth.placeholder = 'Width';
-            customHeight.placeholder = 'Height';
-            this.resizePercentage = null;
-            
-            // Update times symbol to active state
-            const timesSymbol = customWidth.parentNode.querySelector('span');
-            if (timesSymbol) {
-                timesSymbol.className = 'text-sm font-bold text-black';
-            }
+            this.resizeResolution = null;
         }
         
-        // Handle aspect ratio lock
-        if (this.aspectRatioLocked && this.currentAspectRatio && value) {
+        // Handle aspect ratio lock (square mode)
+        if (this.aspectRatioLocked && value) {
             const numValue = parseInt(value);
             if (!isNaN(numValue)) {
+                // Set both fields to the same value (square mode)
                 if (dimension === 'width') {
-                    const newHeight = Math.round(numValue / this.currentAspectRatio);
-                    customHeight.value = newHeight;
+                    customHeight.value = numValue;
                 } else {
-                    const newWidth = Math.round(numValue * this.currentAspectRatio);
-                    customWidth.value = newWidth;
+                    customWidth.value = numValue;
                 }
             }
         }
@@ -339,11 +312,6 @@ class SmolTextures {
     }
 
     handleFiles(files) {
-        if (!this.apiKey) {
-            this.showNotification('Please enter your TinyPNG API key first', 'error');
-            return;
-        }
-
         const glbFiles = Array.from(files).filter(file => file.name.toLowerCase().endsWith('.glb'));
         
         if (glbFiles.length === 0) {
@@ -354,6 +322,13 @@ class SmolTextures {
         if (glbFiles.length > 10) {
             this.showNotification('Maximum 10 files allowed at once', 'error');
             return;
+        }
+
+        // Show notification about compression method
+        if (!this.apiKey) {
+            this.showNotification('Using client-side compression (no API key provided)', 'info');
+        } else {
+            this.showNotification('Using TinyPNG API compression', 'info');
         }
 
         glbFiles.forEach(file => this.processGlbFile(file));
@@ -374,78 +349,347 @@ class SmolTextures {
                 message: 'Processing GLB file...'
             });
 
-            // Prepare form data
-            const formData = new FormData();
-            formData.append('glbFile', file);
-            formData.append('apiKey', this.apiKey);
-            
-            // Add texture optimization enabled flag
-            formData.append('textureOptimizationEnabled', this.textureOptimizationEnabled.toString());
-            
-            // Only send texture optimization settings if texture optimization is enabled
-            if (this.textureOptimizationEnabled) {
-                const targetFormat = document.getElementById('targetFormat').value;
-                const customWidth = document.getElementById('customWidth').value;
-                const customHeight = document.getElementById('customHeight').value;
-                
-                if (targetFormat !== 'compress') {
-                    formData.append('targetFormat', targetFormat);
-                }
-                
-                if (customWidth && customHeight) {
-                    formData.append('customWidth', customWidth);
-                    formData.append('customHeight', customHeight);
-                    formData.append('aspectRatioLocked', this.aspectRatioLocked.toString());
-                } else if (this.resizePercentage) {
-                    formData.append('resizePercentage', this.resizePercentage.toString());
-                }
-            }
+            let processedData;
 
-            // Note: Mesh optimization is now handled client-side
-
-            // Send request to worker
-            const response = await fetch(this.workerUrl, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Check if mesh optimization is enabled
-                if (this.meshOptimizationEnabled) {
-                    this.updateQueueItem(itemId, {
-                        status: 'processing',
-                        progress: 80,
-                        message: 'Applying mesh optimization...'
-                    });
-                    
-                    // Apply mesh optimization client-side
-                    const meshOptimizedData = await this.applyMeshOptimization(result.data);
-                    
-                    this.updateQueueItem(itemId, {
-                        status: 'completed',
-                        progress: 100,
-                        processedData: meshOptimizedData
-                    });
-                } else {
-                    this.updateQueueItem(itemId, {
-                        status: 'completed',
-                        progress: 100,
-                        processedData: result.data
-                    });
-                }
+            if (!this.apiKey) {
+                // Use client-side compression when no API key is provided
+                processedData = await this.processGlbClientSide(file, itemId);
             } else {
-                throw new Error(result.error || 'Unknown error occurred');
+                // Use TinyPNG API via worker when API key is provided
+                processedData = await this.processGlbWithWorker(file, itemId);
+            }
+
+            // Check if mesh optimization is enabled
+            if (this.meshOptimizationEnabled) {
+                this.updateQueueItem(itemId, {
+                    status: 'processing',
+                    progress: 80,
+                    message: 'Applying mesh optimization...'
+                });
+                
+                // Apply mesh optimization client-side
+                const meshOptimizedData = await this.applyMeshOptimization(processedData);
+                
+                this.updateQueueItem(itemId, {
+                    status: 'completed',
+                    progress: 100,
+                    processedData: meshOptimizedData
+                });
+            } else {
+                this.updateQueueItem(itemId, {
+                    status: 'completed',
+                    progress: 100,
+                    processedData: processedData
+                });
             }
 
         } catch (error) {
             console.error('Error processing GLB file:', error);
             this.updateQueueItemError(itemId, error.message);
+        }
+    }
+
+    async processGlbWithWorker(file, itemId) {
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('glbFile', file);
+        formData.append('apiKey', this.apiKey);
+        
+        // Add texture optimization enabled flag
+        formData.append('textureOptimizationEnabled', this.textureOptimizationEnabled.toString());
+        
+        // Only send texture optimization settings if texture optimization is enabled
+        if (this.textureOptimizationEnabled) {
+            const targetFormat = document.getElementById('targetFormat').value;
+            const customWidth = document.getElementById('customWidth').value;
+            const customHeight = document.getElementById('customHeight').value;
+            
+            if (targetFormat !== 'compress') {
+                formData.append('targetFormat', targetFormat);
+            }
+            
+            if (customWidth && customHeight) {
+                formData.append('customWidth', customWidth);
+                formData.append('customHeight', customHeight);
+                formData.append('aspectRatioLocked', this.aspectRatioLocked.toString());
+            } else if (this.resizePercentage) {
+                formData.append('resizePercentage', this.resizePercentage.toString());
+            }
+        }
+
+        // Send request to worker
+        const response = await fetch(this.workerUrl, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            return result.data;
+        } else {
+            throw new Error(result.error || 'Unknown error occurred');
+        }
+    }
+
+    async processGlbClientSide(file, itemId) {
+        try {
+            this.updateQueueItem(itemId, {
+                status: 'processing',
+                progress: 20,
+                message: 'Loading GLB file...'
+            });
+
+            // Convert file to ArrayBuffer
+            const glbBuffer = await file.arrayBuffer();
+            const glbData = new Uint8Array(glbBuffer);
+
+            // Import gltf-transform modules
+            const { NodeIO } = await import('https://cdn.skypack.dev/@gltf-transform/core');
+            
+            this.updateQueueItem(itemId, {
+                status: 'processing',
+                progress: 40,
+                message: 'Processing textures...'
+            });
+
+            // Create IO for reading GLB
+            const io = new NodeIO();
+            
+            // Read the GLB file
+            const gltfDocument = await io.readBinary(glbData);
+
+            let processedData;
+            let texturesOptimized = 0;
+            let originalTextureSize = 0;
+            let optimizedTextureSize = 0;
+            const optimizedTextures = [];
+
+            if (this.textureOptimizationEnabled) {
+                // Get texture optimization settings
+                const targetFormat = document.getElementById('targetFormat').value;
+                const customWidth = document.getElementById('customWidth').value;
+                const customHeight = document.getElementById('customHeight').value;
+
+                // Get all textures from the document
+                const textures = gltfDocument.getRoot().listTextures();
+                
+                if (textures.length > 0) {
+                    this.updateQueueItem(itemId, {
+                        status: 'processing',
+                        progress: 50,
+                        message: `Compressing ${textures.length} textures...`
+                    });
+
+                    // Process each texture manually using Canvas API
+                    for (let i = 0; i < textures.length; i++) {
+                        const texture = textures[i];
+                        const originalImageData = texture.getImage();
+                        
+                        if (!originalImageData) {
+                            continue;
+                        }
+
+                        originalTextureSize += originalImageData.byteLength;
+                        
+                        try {
+                            // Create canvas element for processing
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Convert image data to blob then to Image element
+                            const blob = new Blob([originalImageData], { type: texture.getMimeType() || 'image/png' });
+                            const imgUrl = URL.createObjectURL(blob);
+                            
+                            await new Promise((resolve, reject) => {
+                                const img = new Image();
+                                img.onload = () => {
+                                    try {
+                                        // Calculate dimensions based on settings
+                                        let targetWidth = img.width;
+                                        let targetHeight = img.height;
+                                        
+                                        if (customWidth && customHeight) {
+                                            targetWidth = parseInt(customWidth);
+                                            targetHeight = parseInt(customHeight);
+                                        } else if (this.resizeResolution) {
+                                            // For resolution presets, use the resolution as the maximum dimension
+                                            // while maintaining aspect ratio
+                                            const aspectRatio = img.width / img.height;
+                                            if (img.width > img.height) {
+                                                targetWidth = this.resizeResolution;
+                                                targetHeight = Math.round(this.resizeResolution / aspectRatio);
+                                            } else {
+                                                targetHeight = this.resizeResolution;
+                                                targetWidth = Math.round(this.resizeResolution * aspectRatio);
+                                            }
+                                        }
+                                        
+                                        // Set canvas dimensions
+                                        canvas.width = targetWidth;
+                                        canvas.height = targetHeight;
+                                        
+                                        // Draw and compress image
+                                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+                                        
+                                        // Determine best compression format and settings
+                                        const originalFormat = texture.getMimeType() || 'image/png';
+                                        let outputFormat = targetFormat !== 'compress' ? targetFormat : 'image/jpeg'; // Default to JPEG for better compression
+                                        
+                                        // If original is PNG and user wants to compress, force JPEG conversion
+                                        if (targetFormat === 'compress' && originalFormat === 'image/png') {
+                                            outputFormat = 'image/jpeg';
+                                        }
+                                        
+                                        // Use high quality compression (95%)
+                                        let quality = 0.95;
+                                        
+                                        // Apply small format-specific adjustments
+                                        if (outputFormat === 'image/jpeg') {
+                                            // JPEG typically needs slightly lower quality for good compression
+                                            quality = 0.9;
+                                        } else if (outputFormat === 'image/webp') {
+                                            // WebP handles quality well, use as-is
+                                            quality = 0.95;
+                                        }
+                                        
+                                        console.log(`Using high quality compression: ${Math.round(quality * 100)}%`);
+                                        
+                                        console.log(`Compressing texture ${i}: ${img.width}x${img.height} -> ${targetWidth}x${targetHeight}, ${originalFormat} -> ${outputFormat}, quality: ${quality}`);
+                                        
+                                        const tryCompress = (format, qual) => {
+                                            return new Promise((resolveCompress, rejectCompress) => {
+                                                canvas.toBlob((compressedBlob) => {
+                                                    if (compressedBlob) {
+                                                        console.log(`Texture ${i} blob size: ${originalImageData.byteLength} -> ${compressedBlob.size} bytes`);
+                                                        
+                                                        const reader = new FileReader();
+                                                        reader.onload = (e) => {
+                                                            const compressedArrayBuffer = e.target.result;
+                                                            const compressedData = new Uint8Array(compressedArrayBuffer);
+                                                            
+                                                            const compressionRatio = (originalImageData.byteLength - compressedData.byteLength) / originalImageData.byteLength;
+                                                            
+                                                            // If compression is not significant (less than 5%), try JPEG as fallback
+                                                            if (compressionRatio < 0.05 && format !== 'image/jpeg') {
+                                                                console.log(`Poor compression (${(compressionRatio * 100).toFixed(1)}%), trying JPEG fallback`);
+                                                                resolveCompress({ retry: true });
+                                                                return;
+                                                            }
+                                                            
+                                                            // Store compressed texture for individual download
+                                                            // Convert Uint8Array to base64 safely (avoiding stack overflow)
+                                                            let base64Data = '';
+                                                            const chunkSize = 0x8000; // 32KB chunks
+                                                            for (let j = 0; j < compressedData.length; j += chunkSize) {
+                                                                const chunk = compressedData.subarray(j, j + chunkSize);
+                                                                base64Data += String.fromCharCode.apply(null, chunk);
+                                                            }
+                                                            base64Data = btoa(base64Data);
+                                                            
+                                                            optimizedTextures.push({
+                                                                name: texture.getName() || `texture_${i}`,
+                                                                data: base64Data,
+                                                                mimeType: format,
+                                                                originalSize: originalImageData.byteLength,
+                                                                optimizedSize: compressedData.byteLength
+                                                            });
+                                                            
+                                                            // Update texture with compressed data
+                                                            texture.setImage(compressedData);
+                                                            texture.setMimeType(format);
+                                                            
+                                                            optimizedTextureSize += compressedData.byteLength;
+                                                            texturesOptimized++;
+                                                            
+                                                            const compression = (compressionRatio * 100).toFixed(1);
+                                                            console.log(`Texture ${i} final: ${originalImageData.byteLength} -> ${compressedData.byteLength} bytes (${compression}% reduction)`);
+                                                            
+                                                            resolveCompress({ success: true });
+                                                        };
+                                                        reader.readAsArrayBuffer(compressedBlob);
+                                                    } else {
+                                                        rejectCompress(new Error('Failed to create compressed blob'));
+                                                    }
+                                                }, format, qual);
+                                            });
+                                        };
+                                        
+                                        // Try compression with selected format
+                                        tryCompress(outputFormat, quality)
+                                            .then((result) => {
+                                                if (result.retry) {
+                                                    console.log(`Retrying with JPEG compression at quality 0.85`);
+                                                    return tryCompress('image/jpeg', 0.85);
+                                                }
+                                                return result;
+                                            })
+                                            .then(() => {
+                                                URL.revokeObjectURL(imgUrl);
+                                                resolve();
+                                            })
+                                            .catch((error) => {
+                                                URL.revokeObjectURL(imgUrl);
+                                                reject(error);
+                                            });
+                                        
+                                    } catch (error) {
+                                        reject(error);
+                                    }
+                                };
+                                img.onerror = reject;
+                                img.src = imgUrl;
+                            });
+                            
+                        } catch (error) {
+                            console.warn(`Failed to process texture ${i}:`, error);
+                            // Continue with other textures
+                        }
+                    }
+                    
+                    console.log(`Client-side compression: ${texturesOptimized}/${textures.length} textures processed`);
+                    console.log(`Total texture size: ${originalTextureSize} -> ${optimizedTextureSize} bytes`);
+                }
+            }
+
+            this.updateQueueItem(itemId, {
+                status: 'processing',
+                progress: 70,
+                message: 'Finalizing...'
+            });
+
+            // Write the optimized GLB
+            const optimizedGlbData = await io.writeBinary(gltfDocument);
+
+            // Convert to base64 for consistency with worker response
+            const base64Data = this.arrayBufferToBase64(optimizedGlbData);
+
+            // Generate filename
+            const originalName = file.name;
+            const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+            const processedFilename = `${nameWithoutExt}_optimized.glb`;
+
+            // Create response data structure similar to worker
+            processedData = {
+                processedGlbData: base64Data,
+                processedSize: optimizedGlbData.byteLength,
+                filename: processedFilename,
+                texturesOptimized: texturesOptimized,
+                originalTextureSize: originalTextureSize,
+                optimizedTextureSize: optimizedTextureSize,
+                optimizedTextures: optimizedTextures,
+                clientSideCompression: true // Flag to indicate this was done client-side
+            };
+
+            return processedData;
+
+        } catch (error) {
+            console.error('Client-side processing error:', error);
+            throw error;
         }
     }
 
@@ -643,6 +887,11 @@ class SmolTextures {
             `;
         }).join('');
 
+        // Add client-side compression indicator
+        const compressionBadge = glbData.clientSideCompression ? 
+            '<span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded border border-blue-200 font-medium">Client-side</span>' : 
+            '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200 font-medium">TinyPNG</span>';
+
         return `
             <div class="mt-3 p-3 bg-white border-2 border-gray-200 rounded-lg">
                 <div class="flex items-center gap-2 mb-2">
@@ -652,6 +901,7 @@ class SmolTextures {
                         <polyline points="21,15 16,10 5,21"/>
                     </svg>
                     <span class="font-bold text-gray-800 text-sm">OPTIMIZED TEXTURES</span>
+                    ${compressionBadge}
                 </div>
                 <div class="space-y-2">
                     ${textureButtons}

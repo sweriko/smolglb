@@ -32,8 +32,8 @@
 <body class="bg-[#F0F0F0] min-h-screen p-4 sm:p-6">
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
-        <header class="relative bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-4 sm:p-6 mb-6">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <header class="relative bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-3 sm:p-4 mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
                 <div class="flex items-center gap-3 sm:gap-4">
                     <div class="flex items-center gap-2">
                         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-black">smol</h1>
@@ -43,25 +43,47 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                    <div class="relative w-full sm:w-56 lg:w-64">
-                        <input 
-                            type="password" 
-                            id="apiKey" 
-                            class="w-full border-black border-2 p-2.5 sm:p-3 focus:outline-none focus:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:shadow-[4px_4px_0px_rgba(0,0,0,1)] font-mono text-sm"
+                <div class="flex flex-col gap-2 items-start">
+                    <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                        <div class="relative w-full sm:w-56 lg:w-64">
+                            <input 
+                                type="password" 
+                                id="apiKey" 
+                                class="w-full border-black border-2 p-2.5 sm:p-3 focus:outline-none focus:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:shadow-[4px_4px_0px_rgba(0,0,0,1)] font-mono text-sm"
+                            >
+                            <div id="customPlaceholder" class="absolute top-1/2 transform -translate-y-1/2 left-2.5 sm:left-3 text-sm text-gray-400 font-mono pointer-events-none">
+                                Enter API key, get it <a href="https://tinify.com/developers" target="_blank" class="text-[#6C5CE7] underline hover:text-[#5a4fcf] pointer-events-auto">here</a>
+                            </div>
+                        </div>
+                        <button 
+                            id="saveApiKey"
+                            class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-black border-2 bg-[#00B894] hover:bg-[#00a085] hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:bg-[#008f72] font-bold text-white transition-all duration-150 text-sm sm:text-base"
                         >
-                        <div id="customPlaceholder" class="absolute top-1/2 transform -translate-y-1/2 left-2.5 sm:left-3 text-sm text-gray-400 font-mono pointer-events-none">
-                            Enter API key, get it <a href="https://tinify.com/developers" target="_blank" class="text-[#6C5CE7] underline hover:text-[#5a4fcf] pointer-events-auto">here</a>
+                            SAVE KEY
+                        </button>
+                    </div>
+                    
+                    <!-- Compact fallback explanation -->
+                    <div class="relative max-w-sm">
+                        <div id="noApiKeyBanner" class="p-2 bg-blue-50 border border-blue-200 rounded cursor-pointer hover:bg-blue-100 transition-colors duration-150">
+                            <div class="flex items-center justify-between">
+                                <div class="text-xs text-blue-700 font-medium">
+                                    No API key? - no worries, will still work :)
+                                </div>
+                                <svg id="expandArrow" class="w-3 h-3 text-blue-500 transform transition-transform duration-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Expandable content -->
+                        <div id="expandedExplanation" class="hidden absolute top-full mt-1 left-0 right-0 p-2 bg-white border border-gray-200 rounded shadow-lg z-10">
+                            <div class="text-xs text-gray-700">
+                                Uses browser-based compression instead of TinyPNG. Works offline, supports format conversion, slightly lower compression efficiency.
+                            </div>
                         </div>
                     </div>
-                    <button 
-                        id="saveApiKey"
-                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-black border-2 bg-[#00B894] hover:bg-[#00a085] hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] active:bg-[#008f72] font-bold text-white transition-all duration-150 text-sm sm:text-base"
-                    >
-                        SAVE KEY
-                    </button>
                 </div>
-            </div>
         </header>
 
         <!-- Texture Optimization Controls -->
@@ -98,16 +120,16 @@
                                 
                                 <div class="flex flex-col sm:flex-row gap-3">
                                     <div class="flex gap-2">
-                                        <button id="resize25" class="px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">25%</button>
-                                        <button id="resize50" class="px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">50%</button>
+                                        <button id="resize512" class="px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">512</button>
+                                        <button id="resize1024" class="px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">1024</button>
                                     </div>
                                     
                                     <div class="flex gap-2 items-center">
-                                        <input type="number" id="customWidth" placeholder="Width" class="w-20 px-2 py-1.5 border-2 border-gray-400 bg-gray-100 text-gray-500 font-mono text-sm cursor-not-allowed" disabled>
-                                        <span class="text-sm font-bold text-gray-400">×</span>
-                                        <input type="number" id="customHeight" placeholder="Height" class="w-20 px-2 py-1.5 border-2 border-gray-400 bg-gray-100 text-gray-500 font-mono text-sm cursor-not-allowed" disabled>
-                                        <button id="aspectRatioLock" class="w-7 h-7 border-2 border-gray-400 bg-gray-200 rounded-md flex items-center justify-center cursor-not-allowed" disabled>
-                                            <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <input type="number" id="customWidth" placeholder="Width" class="w-20 px-2 py-1.5 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                        <span class="text-sm font-bold text-black">×</span>
+                                        <input type="number" id="customHeight" placeholder="Height" class="w-20 px-2 py-1.5 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                        <button id="aspectRatioLock" class="w-7 h-7 border-2 border-black bg-[#6C5CE7] hover:bg-[#5a4fcf] rounded-md flex items-center justify-center transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path d="M6 10v-4a6 6 0 1 1 12 0v4"/>
                                                 <rect x="2" y="10" width="20" height="10" rx="2" ry="2"/>
                                             </svg>

@@ -69,10 +69,21 @@ export default {
       console.log('API key:', apiKey ? 'present' : 'missing');
 
       // Validate inputs
-      if (!glbFile || !apiKey) {
+      if (!glbFile) {
         return new Response(JSON.stringify({ 
           success: false, 
-          error: `Missing GLB file or API key. GlbFile: ${!!glbFile}, ApiKey: ${!!apiKey}` 
+          error: 'Missing GLB file' 
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // If texture optimization is enabled but no API key provided, return error
+      if (textureOptimizationEnabled && !apiKey) {
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'API key is required when texture optimization is enabled' 
         }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -112,8 +123,8 @@ export default {
       
       let optimizationResult;
       
-      if (textureOptimizationEnabled) {
-        // Process GLB file with texture optimization
+      if (textureOptimizationEnabled && apiKey) {
+        // Process GLB file with texture optimization using TinyPNG
         const textureOptions = {
           targetFormat: targetFormat !== 'compress' ? targetFormat : undefined,
           customWidth: customWidth ? parseInt(customWidth) : undefined,
@@ -125,7 +136,7 @@ export default {
         optimizationResult = await optimizeGlbTextures(glbData, apiKey, textureOptions);
       } else {
         // Skip texture optimization, return original GLB data
-        console.log('Texture optimization disabled, returning original GLB data');
+        console.log('Texture optimization disabled or no API key, returning original GLB data');
         optimizationResult = {
           processedGlbData: glbData.buffer,
           texturesOptimized: 0,
