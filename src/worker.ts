@@ -1,6 +1,7 @@
 interface ProcessGlbRequest {
   glbFile: File;
   apiKey: string;
+  textureOptimizationEnabled?: boolean;
   targetFormat?: string;
   customWidth?: string;
   customHeight?: string;
@@ -57,6 +58,7 @@ export default {
       const formData = await request.formData();
       const glbFile = formData.get('glbFile') as File;
       const apiKey = formData.get('apiKey') as string;
+      const textureOptimizationEnabled = formData.get('textureOptimizationEnabled') === 'true';
       const targetFormat = formData.get('targetFormat') as string;
       const customWidth = formData.get('customWidth') as string;
       const customHeight = formData.get('customHeight') as string;
@@ -104,22 +106,37 @@ export default {
       const glbBuffer = await glbFile.arrayBuffer();
       const glbData = new Uint8Array(glbBuffer);
 
-      console.log(`Starting GLB texture optimization for ${glbFile.name} (${glbFile.size} bytes)`);
+      console.log(`Starting GLB processing for ${glbFile.name} (${glbFile.size} bytes)`);
+      console.log(`Texture optimization enabled: ${textureOptimizationEnabled}`);
       const startTime = Date.now();
       
-      // Process GLB file
-      const textureOptions = {
-        targetFormat: targetFormat !== 'compress' ? targetFormat : undefined,
-        customWidth: customWidth ? parseInt(customWidth) : undefined,
-        customHeight: customHeight ? parseInt(customHeight) : undefined,
-        aspectRatioLocked,
-        resizePercentage: resizePercentage ? parseInt(resizePercentage) : undefined
-      };
+      let optimizationResult;
+      
+      if (textureOptimizationEnabled) {
+        // Process GLB file with texture optimization
+        const textureOptions = {
+          targetFormat: targetFormat !== 'compress' ? targetFormat : undefined,
+          customWidth: customWidth ? parseInt(customWidth) : undefined,
+          customHeight: customHeight ? parseInt(customHeight) : undefined,
+          aspectRatioLocked,
+          resizePercentage: resizePercentage ? parseInt(resizePercentage) : undefined
+        };
 
-      const optimizationResult = await optimizeGlbTextures(glbData, apiKey, textureOptions);
+        optimizationResult = await optimizeGlbTextures(glbData, apiKey, textureOptions);
+      } else {
+        // Skip texture optimization, return original GLB data
+        console.log('Texture optimization disabled, returning original GLB data');
+        optimizationResult = {
+          processedGlbData: glbData.buffer,
+          texturesOptimized: 0,
+          originalTextureSize: 0,
+          optimizedTextureSize: 0,
+          optimizedTextures: [],
+        };
+      }
       
       const processingTime = Date.now() - startTime;
-      console.log(`GLB optimization completed in ${processingTime}ms`);
+      console.log(`GLB processing completed in ${processingTime}ms`);
 
       // Generate filename for processed GLB
       const originalName = glbFile.name;
