@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>smol textures</title>
+    <title>smol PRESS</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.24.0/meshopt_decoder.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.24.0/meshopt_encoder.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.24.0/meshopt_simplifier.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
         body {
@@ -35,7 +38,7 @@
                     <div class="flex items-center gap-2">
                         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-black">smol</h1>
                         <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-black">
-                            TEXTURES
+                            PRESS
                         </div>
                     </div>
                 </div>
@@ -64,53 +67,89 @@
         <!-- Texture Optimization Controls -->
         <div class="mb-6">
             <div class="bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-4 sm:p-6 mb-4">
-                <div class="flex flex-col gap-4">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-sm sm:text-base font-bold text-black">TEXTURE OPTIMIZATION:</span>
-                    </div>
-                    
-                    <!-- Format Selection -->
-                    <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-black">FORMAT:</span>
-                        </div>
-                        <select id="targetFormat" class="px-3 py-2 border-2 border-black bg-white font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                            <option value="compress">Keep Original (Compress Only)</option>
-                            <option value="image/png">PNG</option>
-                            <option value="image/jpeg">JPEG</option>
-                            <option value="image/webp">WebP</option>
-                            <option value="image/avif">AVIF</option>
-                        </select>
-                    </div>
-                    
-                    <!-- Resize Options -->
-                    <div class="flex flex-col gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-bold text-black">RESIZE:</span>
+                <div class="flex flex-col lg:flex-row gap-6">
+                    <!-- Texture Optimization Section -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-4 h-6">
+                            <input type="checkbox" id="enableTextureOptimization" class="w-4 h-4 border-2 border-black rounded-sm accent-[#6C5CE7]" checked>
+                            <span class="text-sm sm:text-base font-bold text-black">TEXTURE COMPRESSION:</span>
                         </div>
                         
-                        <div class="flex flex-col sm:flex-row gap-3">
-                            <div class="flex gap-2">
-                                <button id="resize50" class="px-3 py-2 border-2 border-black bg-[#FFF5B4] hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">50%</button>
-                                <button id="resize75" class="px-3 py-2 border-2 border-black bg-[#FFF5B4] hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">75%</button>
-                                <button id="resize100" class="px-3 py-2 border-2 border-black bg-[#E17055] hover:bg-[#d63031] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-white text-sm transition-all duration-150 flex items-center justify-center">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
+                        <div id="textureOptimizationSettings" class="flex flex-col gap-4 min-h-[120px]">
+                            <!-- Format Selection -->
+                            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center min-h-[44px]">
+                                <div class="flex items-center gap-2 w-20 flex-shrink-0">
+                                    <span class="text-sm font-bold text-black">FORMAT:</span>
+                                </div>
+                                <select id="targetFormat" class="px-3 py-2 border-2 border-black bg-white font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                    <option value="compress">Keep Original (Compress Only)</option>
+                                    <option value="image/png">PNG</option>
+                                    <option value="image/jpeg">JPEG</option>
+                                    <option value="image/webp">WebP</option>
+                                    <option value="image/avif">AVIF</option>
+                                </select>
                             </div>
                             
-                            <div class="flex gap-2 items-center">
-                                <input type="number" id="customWidth" placeholder="Width" class="w-20 px-2 py-2 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                                <span class="text-sm font-bold">×</span>
-                                <input type="number" id="customHeight" placeholder="Height" class="w-20 px-2 py-2 border-2 border-black font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                                <button id="aspectRatioLock" class="w-8 h-8 border-2 border-black bg-[#6C5CE7] hover:bg-[#5a4fcf] rounded-md flex items-center justify-center transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M6 10v-4a6 6 0 1 1 12 0v4"/>
-                                        <rect x="2" y="10" width="20" height="10" rx="2" ry="2"/>
-                                    </svg>
-                                </button>
+                            <!-- Resize Options -->
+                            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center min-h-[44px]">
+                                <div class="flex items-center gap-2 w-20 flex-shrink-0">
+                                    <span class="text-sm font-bold text-black">RESIZE <span class="text-xs text-gray-500">(optional)</span>:</span>
+                                </div>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <div class="flex gap-2">
+                                        <button id="resize25" class="px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">25%</button>
+                                        <button id="resize50" class="px-3 py-1.5 border-2 border-black bg-white hover:bg-[#FFEB3B] hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] font-bold text-black text-sm transition-all duration-150">50%</button>
+                                    </div>
+                                    
+                                    <div class="flex gap-2 items-center">
+                                        <input type="number" id="customWidth" placeholder="Width" class="w-20 px-2 py-1.5 border-2 border-gray-400 bg-gray-100 text-gray-500 font-mono text-sm cursor-not-allowed" disabled>
+                                        <span class="text-sm font-bold text-gray-400">×</span>
+                                        <input type="number" id="customHeight" placeholder="Height" class="w-20 px-2 py-1.5 border-2 border-gray-400 bg-gray-100 text-gray-500 font-mono text-sm cursor-not-allowed" disabled>
+                                        <button id="aspectRatioLock" class="w-7 h-7 border-2 border-gray-400 bg-gray-200 rounded-md flex items-center justify-center cursor-not-allowed" disabled>
+                                            <svg class="w-3.5 h-3.5 text-black" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path d="M6 10v-4a6 6 0 1 1 12 0v4"/>
+                                                <rect x="2" y="10" width="20" height="10" rx="2" ry="2"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Mesh Optimization Section -->
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-4 h-6">
+                            <input type="checkbox" id="enableMeshOptimization" class="w-4 h-4 border-2 border-black rounded-sm accent-[#6C5CE7]">
+                            <span class="text-sm sm:text-base font-bold text-black">MESH OPTIMIZATION:</span>
+                        </div>
+                        
+                        <div id="meshOptimizationSettings" class="flex flex-col gap-4 opacity-50 pointer-events-none min-h-[120px]">
+                            <!-- Simplification Ratio -->
+                            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center min-h-[44px]">
+                                <div class="flex items-center gap-2 w-32 flex-shrink-0">
+                                    <span class="text-sm font-bold text-black">KEEP % of vertices:</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input type="range" id="meshRatio" min="0.1" max="1.0" step="0.05" value="0.75" class="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    <span id="meshRatioValue" class="text-sm font-bold text-black w-12">75%</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Error Threshold -->
+                            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center min-h-[44px]">
+                                <div class="flex items-center gap-2 w-32 flex-shrink-0">
+                                    <span class="text-sm font-bold text-black">ERROR THRESHOLD:</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <select id="meshErrorThreshold" class="px-3 py-2 border-2 border-black bg-white font-mono text-sm focus:outline-none focus:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
+                                        <option value="0.0001">0.01% (High Quality)</option>
+                                        <option value="0.001" selected>0.1% (Balanced)</option>
+                                        <option value="0.01">1% (Lower Quality)</option>
+                                        <option value="1">No Limit (Max Compression)</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -140,11 +179,6 @@
         <!-- Processing Queue -->
         <div id="queueSection" class="bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-4 sm:p-6">
             <div class="flex items-center gap-3 mb-4 sm:mb-6">
-                <div class="w-7 h-7 sm:w-8 sm:h-8 bg-[#FF8C42] border-2 border-black rounded-md flex items-center justify-center">
-                    <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M4,6V8H20V6H4M4,10V12H20V10H4M4,14V16H20V14H4M4,18V20H20V18H4Z"/>
-                    </svg>
-                </div>
                 <h2 class="text-xl sm:text-2xl font-black text-black">PROCESSING QUEUE</h2>
             </div>
             
