@@ -6,6 +6,12 @@ compatibility_date = "2023-11-21"
 binding = "STATIC_FILES"
 bucket_name = "smolglb"
 
+# Custom domain routes
+routes = [
+  { pattern = "smolglb.com/*", zone_name = "smolglb.com" },
+  { pattern = "www.smolglb.com/*", zone_name = "smolglb.com" }
+]
+
 [vars]
 # Add any environment variables here
 
