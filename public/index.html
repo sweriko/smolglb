@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>smol PRESS</title>
+    <title>smol GLB</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.24.0/meshopt_decoder.min.js"></script>
@@ -27,10 +27,71 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+        
+        /* Neo Brutalist Range Slider */
+        .brutalist-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border: 2px solid black;
+            background: white;
+            border-radius: 0;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .brutalist-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 20px;
+            background: #6C5CE7;
+            border: 2px solid black;
+            border-radius: 0;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px rgba(0,0,0,1);
+        }
+        
+        .brutalist-slider::-webkit-slider-thumb:hover {
+            background: #5a4fcf;
+            box-shadow: 3px 3px 0px rgba(0,0,0,1);
+        }
+        
+        .brutalist-slider::-webkit-slider-thumb:active {
+            box-shadow: 1px 1px 0px rgba(0,0,0,1);
+        }
+        
+        .brutalist-slider::-moz-range-thumb {
+            width: 12px;
+            height: 20px;
+            background: #6C5CE7;
+            border: 2px solid black;
+            border-radius: 0;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px rgba(0,0,0,1);
+        }
+        
+        .brutalist-slider::-moz-range-thumb:hover {
+            background: #5a4fcf;
+            box-shadow: 3px 3px 0px rgba(0,0,0,1);
+        }
+        
+        .brutalist-slider::-moz-range-thumb:active {
+            box-shadow: 1px 1px 0px rgba(0,0,0,1);
+        }
+        
+        .brutalist-slider::-moz-range-track {
+            height: 8px;
+            border: 2px solid black;
+            background: white;
+            border-radius: 0;
+        }
     </style>
 </head>
 <body class="bg-[#F0F0F0] min-h-screen p-4 sm:p-6">
     <div class="max-w-7xl mx-auto">
+
+
         <!-- Header -->
         <header class="relative bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-3 sm:p-4 mb-6">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
@@ -38,7 +99,7 @@
                     <div class="flex items-center gap-2">
                         <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black text-black">smol</h1>
                         <div class="text-2xl sm:text-3xl lg:text-4xl font-black text-black">
-                            PRESS
+                            GLB
                         </div>
                     </div>
                 </div>
@@ -64,7 +125,7 @@
                     </div>
                     
                     <!-- Compact fallback explanation -->
-                    <div class="relative max-w-sm">
+                    <div class="relative w-full">
                         <div id="noApiKeyBanner" class="p-2 bg-blue-50 border border-blue-200 rounded cursor-pointer hover:bg-blue-100 transition-colors duration-150">
                             <div class="flex items-center justify-between">
                                 <div class="text-xs text-blue-700 font-medium">
@@ -77,9 +138,16 @@
                         </div>
                         
                         <!-- Expandable content -->
-                        <div id="expandedExplanation" class="hidden absolute top-full mt-1 left-0 right-0 p-2 bg-white border border-gray-200 rounded shadow-lg z-10">
-                            <div class="text-xs text-gray-700">
-                                Uses browser-based compression instead of TinyPNG. Works offline, supports format conversion, slightly lower compression efficiency.
+                        <div id="expandedExplanation" class="hidden absolute top-full mt-1 left-0 right-0 p-3 bg-white border border-gray-200 rounded shadow-lg z-10">
+                            <div class="text-xs text-gray-700 leading-relaxed">
+                                <p class="mb-2">
+                                    <strong>Browser-based optimization fallback:</strong><br>
+                                    • Works fully client-side = free<br>
+                                    • Worse quality compared to TinyPNG services
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    This API also acts as a demo for further integration of more advanced optimization features, such as AI-powered retopology.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -154,7 +222,7 @@
                                     <span class="text-sm font-bold text-black">KEEP % of vertices:</span>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <input type="range" id="meshRatio" min="0.1" max="1.0" step="0.05" value="0.75" class="w-32 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                    <input type="range" id="meshRatio" min="0.1" max="1.0" step="0.05" value="0.75" class="w-32 brutalist-slider">
                                     <span id="meshRatioValue" class="text-sm font-bold text-black w-12">75%</span>
                                 </div>
                             </div>
@@ -192,7 +260,7 @@
                         <line x1="12" y1="3" x2="12" y2="15"/>
                     </svg>
                 </div>
-                <h2 class="text-lg sm:text-xl lg:text-2xl font-black text-black mb-2">DROP YOUR GLB MODELS HERE</h2>
+                <h2 class="text-lg sm:text-xl lg:text-2xl font-black text-black mb-2">DROP YOUR MODELS HERE</h2>
                 <p class="text-xs sm:text-sm font-medium text-gray-600">GLB files • Up to 100MB</p>
             </div>
             <input type="file" id="fileInput" multiple accept=".glb" class="absolute inset-0 opacity-0 cursor-pointer">
@@ -206,6 +274,112 @@
             
             <div id="queueContainer" class="flex flex-col gap-3 sm:gap-4">
                 <!-- Processed models will appear here -->
+            </div>
+        </div>
+
+        <!-- Utility buttons in bottom-right -->
+        <div class="flex justify-end mt-4">
+            <button id="privacyButton" class="px-2 py-1.5 text-sm font-bold text-gray-600 hover:text-black transition-colors duration-150 underline">
+                Privacy
+            </button>
+            <button id="contactButton" class="px-2 py-1.5 text-sm font-bold text-gray-600 hover:text-black transition-colors duration-150 underline">
+                About
+            </button>
+        </div>
+    </div>
+
+
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-black text-black">PRIVACY POLICY</h2>
+                <button id="closePrivacyModal" class="w-8 h-8 border-2 border-black bg-red-500 hover:bg-red-600 text-white font-bold rounded-md flex items-center justify-center hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-150">
+                    ×
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-sm leading-relaxed">
+                <div>
+                    <h3 class="font-bold text-black mb-2">Data Processing</h3>
+                    <p class="text-gray-700">
+                        This application processes 3D models (GLB files) for optimization. <strong>No models or data uploaded by users are stored on our servers.</strong> All processing happens locally in your browser or temporarily on our processing servers.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-black mb-2">Local Processing</h3>
+                    <p class="text-gray-700">
+                        When no TinyPNG API key is provided, all processing is done entirely in your browser using JavaScript. No data leaves your device during this process.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-black mb-2">TinyPNG API Usage</h3>
+                    <p class="text-gray-700">
+                        When you provide a TinyPNG API key, texture images extracted from your 3D models are sent to TinyPNG's servers for compression. <strong>Only texture image data is transmitted</strong> - not the complete 3D model.
+                    </p>
+                    <p class="text-gray-700 mt-2">
+                        For information about how TinyPNG handles your data, please review their terms of service at: <a href="https://tinify.com/terms" target="_blank" class="text-[#6C5CE7] underline hover:text-[#5a4fcf]">https://tinify.com/terms</a>
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-black mb-2">API Key Storage</h3>
+                    <p class="text-gray-700">
+                        Your TinyPNG API key is stored locally in your browser's localStorage and is not transmitted to our servers except when making API calls to TinyPNG on your behalf.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-black mb-2">Data Retention</h3>
+                    <p class="text-gray-700">
+                        We do not retain any user data, models, or processed files. All data is temporarily processed and immediately returned to your browser.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold text-black mb-2">Analytics & Tracking</h3>
+                    <p class="text-gray-700">
+                        This application does not use cookies, tracking pixels, or analytics services. No personal information is collected.
+                    </p>
+                </div>
+                
+                <div class="text-xs text-gray-500 pt-4 border-t border-gray-200">
+                    <p>This privacy policy applies to the smol GLB application. For questions or concerns, please contact us via the linked social media accounts.</p>
+                    <p class="mt-2">Last updated: December 2024</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white border-4 border-black shadow-[8px_8px_0px_rgba(0,0,0,1)] rounded-lg p-6 max-w-md w-full">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-black text-black">ABOUT</h2>
+                <button id="closeContactModal" class="w-8 h-8 border-2 border-black bg-red-500 hover:bg-red-600 text-white font-bold rounded-md flex items-center justify-center hover:shadow-[2px_2px_0px_rgba(0,0,0,1)] transition-all duration-150">
+                    ×
+                </button>
+            </div>
+            
+            <div class="text-sm leading-relaxed">
+                <div class="space-y-3 text-gray-700">
+                    <p>
+                        Hi! my name is Erik, and I am currently working on an ambitious browser game called <a href="https://westwelt.com" target="_blank" class="text-[#6C5CE7] underline hover:text-[#5a4fcf]">westwelt.com</a>.
+                    </p>
+                    <p>
+                        I also love building tools!
+                    </p>
+                    <p class="flex items-center gap-2">
+                        You can follow my journey on 
+                        <a href="https://x.com/sweriko" target="_blank" class="flex items-center gap-1 text-[#6C5CE7] underline hover:text-[#5a4fcf]">
+                            <img src="xicon.png" alt="X (Twitter)" class="w-4 h-4">
+                            <span class="font-mono">@sweriko</span>
+                        </a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
