@@ -5,88 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>smol GLB</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.24.0/meshopt_decoder.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.24.0/meshopt_encoder.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/meshoptimizer@0.24.0/meshopt_simplifier.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap');
-        body {
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Neo Brutalist Range Slider */
-        .brutalist-slider {
-            -webkit-appearance: none;
-            appearance: none;
-            height: 8px;
-            border: 2px solid black;
-            background: white;
-            border-radius: 0;
-            outline: none;
-            cursor: pointer;
-        }
-        
-        .brutalist-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 20px;
-            background: #6C5CE7;
-            border: 2px solid black;
-            border-radius: 0;
-            cursor: pointer;
-            box-shadow: 2px 2px 0px rgba(0,0,0,1);
-        }
-        
-        .brutalist-slider::-webkit-slider-thumb:hover {
-            background: #5a4fcf;
-            box-shadow: 3px 3px 0px rgba(0,0,0,1);
-        }
-        
-        .brutalist-slider::-webkit-slider-thumb:active {
-            box-shadow: 1px 1px 0px rgba(0,0,0,1);
-        }
-        
-        .brutalist-slider::-moz-range-thumb {
-            width: 12px;
-            height: 20px;
-            background: #6C5CE7;
-            border: 2px solid black;
-            border-radius: 0;
-            cursor: pointer;
-            box-shadow: 2px 2px 0px rgba(0,0,0,1);
-        }
-        
-        .brutalist-slider::-moz-range-thumb:hover {
-            background: #5a4fcf;
-            box-shadow: 3px 3px 0px rgba(0,0,0,1);
-        }
-        
-        .brutalist-slider::-moz-range-thumb:active {
-            box-shadow: 1px 1px 0px rgba(0,0,0,1);
-        }
-        
-        .brutalist-slider::-moz-range-track {
-            height: 8px;
-            border: 2px solid black;
-            background: white;
-            border-radius: 0;
-        }
-    </style>
 </head>
 <body class="bg-[#F0F0F0] min-h-screen p-4 sm:p-6">
     <div class="max-w-7xl mx-auto">

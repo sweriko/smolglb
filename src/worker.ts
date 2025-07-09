@@ -29,6 +29,10 @@ interface ProcessGlbResponse {
   error?: string;
 }
 
+interface Env {
+  STATIC_FILES: R2Bucket;
+}
+
 // CORS headers for browser compatibility
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,7 +41,9 @@ const corsHeaders = {
 };
 
 export default {
-  async fetch(request: Request): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url);
+    
     // Handle CORS preflight requests
     if (request.method === 'OPTIONS') {
       return new Response(null, {
@@ -46,13 +52,80 @@ export default {
       });
     }
 
-    // Only allow POST requests
-    if (request.method !== 'POST') {
-      return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), {
-        status: 405,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Handle GET requests for static files
+    if (request.method === 'GET') {
+      return await handleStaticFiles(request, env.STATIC_FILES);
     }
+
+    // Handle POST requests for GLB processing
+    if (request.method === 'POST') {
+      return await handleGlbProcessing(request);
+    }
+
+    // Method not allowed
+    return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  },
+};
+
+async function handleStaticFiles(request: Request, bucket: R2Bucket): Promise<Response> {
+  const url = new URL(request.url);
+  let key = url.pathname.substring(1); // Remove leading slash
+  
+  // Default to index.html for root path
+  if (key === '' || key === '/') {
+    key = 'index.html';
+  }
+  
+  try {
+    const object = await bucket.get(key);
+    
+    if (object === null) {
+      return new Response('Not Found', { status: 404 });
+    }
+    
+    // Get content type based on file extension
+    const contentType = getContentType(key);
+    
+    const headers = new Headers();
+    headers.set('Content-Type', contentType);
+    headers.set('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+    
+    return new Response(object.body, { headers });
+  } catch (error) {
+    return new Response('Internal Server Error', { status: 500 });
+  }
+}
+
+function getContentType(filename: string): string {
+  const ext = filename.split('.').pop()?.toLowerCase();
+  
+  switch (ext) {
+    case 'html':
+      return 'text/html';
+    case 'js':
+      return 'application/javascript';
+    case 'css':
+      return 'text/css';
+    case 'png':
+      return 'image/png';
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'gif':
+      return 'image/gif';
+    case 'svg':
+      return 'image/svg+xml';
+    case 'ico':
+      return 'image/x-icon';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+async function handleGlbProcessing(request: Request): Promise<Response> {
 
     try {
       const formData = await request.formData();
@@ -191,8 +264,7 @@ export default {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-  },
-};
+}
 
 async function optimizeGlbTextures(glbData: Uint8Array, apiKey: string, options: {
   targetFormat?: string;

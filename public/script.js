@@ -1,7 +1,7 @@
 class SmolTextures {
     constructor() {
         this.apiKey = localStorage.getItem('tinypng-api-key') || '';
-        this.workerUrl = 'http://127.0.0.1:8787'; // Local development worker URL
+        this.workerUrl = window.location.origin; // Use current domain
         this.processingQueue = new Map();
         this.aspectRatioLocked = true;
         this.currentAspectRatio = null;
