@@ -25,6 +25,58 @@ class SmolTextures {
         const apiKeyInput = document.getElementById('apiKey');
         const saveApiKeyBtn = document.getElementById('saveApiKey');
 
+        // Privacy modal controls
+        const privacyButton = document.getElementById('privacyButton');
+        const privacyModal = document.getElementById('privacyModal');
+        const closePrivacyModal = document.getElementById('closePrivacyModal');
+
+        privacyButton.addEventListener('click', () => {
+            privacyModal.classList.remove('hidden');
+        });
+
+        closePrivacyModal.addEventListener('click', () => {
+            privacyModal.classList.add('hidden');
+        });
+
+        // Close modal when clicking backdrop
+        privacyModal.addEventListener('click', (e) => {
+            if (e.target === privacyModal) {
+                privacyModal.classList.add('hidden');
+            }
+        });
+
+        // Contact modal controls
+        const contactButton = document.getElementById('contactButton');
+        const contactModal = document.getElementById('contactModal');
+        const closeContactModal = document.getElementById('closeContactModal');
+
+        contactButton.addEventListener('click', () => {
+            contactModal.classList.remove('hidden');
+        });
+
+        closeContactModal.addEventListener('click', () => {
+            contactModal.classList.add('hidden');
+        });
+
+        // Close modal when clicking backdrop
+        contactModal.addEventListener('click', (e) => {
+            if (e.target === contactModal) {
+                contactModal.classList.add('hidden');
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (!privacyModal.classList.contains('hidden')) {
+                    privacyModal.classList.add('hidden');
+                }
+                if (!contactModal.classList.contains('hidden')) {
+                    contactModal.classList.add('hidden');
+                }
+            }
+        });
+
         // API Key management
         apiKeyInput.addEventListener('input', (e) => {
             this.apiKey = e.target.value;
@@ -341,6 +393,9 @@ class SmolTextures {
         try {
             // Create queue item
             this.createQueueItem(file, itemId);
+            
+            // Generate thumbnail immediately (non-blocking)
+            this.generateThumbnail(file, itemId);
             
             // Update status to processing
             this.updateQueueItem(itemId, { 
@@ -701,7 +756,7 @@ class SmolTextures {
             <div id="${itemId}" class="border-2 border-black bg-gray-50 p-4 rounded-lg">
                 <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <div class="w-10 h-10 bg-[#6C5CE7] border-2 border-black rounded-md flex items-center justify-center flex-shrink-0">
+                        <div id="icon-${itemId}" class="w-10 h-10 bg-[#6C5CE7] border-2 border-black rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
@@ -732,7 +787,7 @@ class SmolTextures {
             </div>
         `;
         
-        container.insertAdjacentHTML('beforeend', itemHtml);
+        container.insertAdjacentHTML('afterbegin', itemHtml);
     }
 
     updateQueueItem(itemId, data) {
@@ -903,7 +958,7 @@ class SmolTextures {
                     <span class="font-bold text-gray-800 text-sm">OPTIMIZED TEXTURES</span>
                     ${compressionBadge}
                 </div>
-                <div class="space-y-2">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                     ${textureButtons}
                 </div>
             </div>
@@ -980,6 +1035,9 @@ class SmolTextures {
                         <button id="toggleWireframe" class="px-3 py-2 border-2 border-black bg-[#6C5CE7] hover:bg-[#5a4fcf] text-white text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                             WIREFRAME
                         </button>
+                        <button id="isolatedWireframe" class="px-3 py-2 border-2 border-black bg-[#FF6B35] hover:bg-[#e55a2b] text-white text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]" style="display: none;">
+                            ISOLATED
+                        </button>
                         <button id="closePreview" class="p-2 border-2 border-black bg-red-500 hover:bg-red-600 text-white rounded hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -991,25 +1049,25 @@ class SmolTextures {
                 
                 <div class="relative h-[calc(100%-80px)]">
                     <!-- File info labels -->
-                    <div class="absolute top-4 left-4 z-40 flex flex-col gap-2">
-                        <div class="bg-blue-500 text-white px-3 py-1 rounded border-2 border-black font-bold text-sm">
+                    <div class="absolute top-4 left-4 z-40 flex flex-col gap-3">
+                        <div class="bg-blue-500 text-white px-6 py-3 rounded-lg border-4 border-black font-black text-xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                             ORIGINAL
                         </div>
-                        <div class="bg-white border-2 border-black px-3 py-2 rounded font-mono text-xs">
+                        <div class="bg-white border-4 border-black px-6 py-4 rounded-lg font-bold text-lg text-red-600 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                             ${this.formatFileSize(originalFile.size)}
                         </div>
-                        <div id="originalStats" class="bg-white border-2 border-black px-3 py-2 rounded font-mono text-xs" style="display: none;">
+                        <div id="originalStats" class="bg-white border-4 border-black px-4 py-3 rounded-lg font-mono text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]" style="display: none;">
                             ${processedData.originalVertexCount ? `${processedData.originalVertexCount.toLocaleString()} vertices<br/>${Math.round(processedData.originalTriangleCount).toLocaleString()} triangles` : 'No mesh data'}
                         </div>
                     </div>
-                    <div class="absolute top-4 right-4 z-40 flex flex-col gap-2">
-                        <div class="bg-green-500 text-white px-3 py-1 rounded border-2 border-black font-bold text-sm">
+                    <div class="absolute top-4 right-4 z-40 flex flex-col gap-3">
+                        <div class="bg-green-500 text-white px-6 py-3 rounded-lg border-4 border-black font-black text-xl shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                             COMPRESSED
                         </div>
-                        <div class="bg-white border-2 border-black px-3 py-2 rounded font-mono text-xs">
+                        <div class="bg-white border-4 border-black px-6 py-4 rounded-lg font-bold text-lg text-green-600 shadow-[4px_4px_0px_rgba(0,0,0,1)]">
                             ${this.formatFileSize(processedData.processedSize)}
                         </div>
-                        <div id="optimizedStats" class="bg-white border-2 border-black px-3 py-2 rounded font-mono text-xs" style="display: none;">
+                        <div id="optimizedStats" class="bg-white border-4 border-black px-4 py-3 rounded-lg font-mono text-sm shadow-[2px_2px_0px_rgba(0,0,0,1)]" style="display: none;">
                             ${processedData.optimizedVertexCount ? `${processedData.optimizedVertexCount.toLocaleString()} vertices<br/>${Math.round(processedData.optimizedTriangleCount).toLocaleString()} triangles` : 'No mesh data'}
                         </div>
                     </div>
@@ -1020,7 +1078,7 @@ class SmolTextures {
                         <div id="scene1Container" class="absolute inset-0 w-full h-full z-10"></div>
                         <div id="scene2Container" class="absolute inset-0 w-full h-full z-10"></div>
                         <!-- Interactive split line -->
-                        <div id="splitLine" class="absolute top-0 w-4 h-full z-30 cursor-col-resize transition-all duration-75" style="left: 50%; transform: translateX(-50%);">
+                        <div id="splitLine" class="absolute top-0 w-4 h-full z-30 transition-all duration-75" style="left: 50%; transform: translateX(-50%);">
                             <!-- Visual line - extends to bottom of modal -->
                             <div class="absolute top-0 left-1/2 w-1 bg-white border-l-2 border-r-2 border-black transform -translate-x-1/2 pointer-events-none" style="height: calc(100% + 80px);"></div>
                             <!-- Draggable handle - Neo Brutalism Style -->
@@ -1050,12 +1108,17 @@ class SmolTextures {
             this.closePreview();
         };
         
-        // Store wireframe state
-        this.wireframeMode = false;
+        // Store wireframe state: 0 = solid, 1 = wireframe overlay, 2 = wireframe isolated
+        this.wireframeMode = 0;
         
         // Add wireframe toggle functionality
         document.getElementById('toggleWireframe').onclick = () => {
             this.toggleWireframe();
+        };
+        
+        // Add isolated wireframe functionality
+        document.getElementById('isolatedWireframe').onclick = () => {
+            this.toggleIsolatedWireframe();
         };
         
         // Close on ESC key
@@ -1079,23 +1142,57 @@ class SmolTextures {
     }
 
     toggleWireframe() {
-        this.wireframeMode = !this.wireframeMode;
-        
-        // Update button appearance
-        const button = document.getElementById('toggleWireframe');
-        if (this.wireframeMode) {
-            button.textContent = 'SOLID';
-            button.className = 'px-3 py-2 border-2 border-black bg-[#FFEB3B] hover:bg-[#FDD835] text-black text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
+        if (this.wireframeMode === 0) {
+            // Switch from SOLID to WIREFRAME OVERLAY
+            this.wireframeMode = 1;
         } else {
-            button.textContent = 'WIREFRAME';
-            button.className = 'px-3 py-2 border-2 border-black bg-[#6C5CE7] hover:bg-[#5a4fcf] text-white text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
+            // Switch to SOLID (from either overlay or isolated)
+            this.wireframeMode = 0;
+        }
+        this.updateWireframeButtons();
+        this.applyWireframeMode();
+    }
+    
+    toggleIsolatedWireframe() {
+        if (this.wireframeMode === 2) {
+            // Already in isolated mode, go back to wireframe overlay
+            this.wireframeMode = 1;
+        } else {
+            // Switch to isolated wireframe mode
+            this.wireframeMode = 2;
+        }
+        this.updateWireframeButtons();
+        this.applyWireframeMode();
+    }
+    
+    updateWireframeButtons() {
+        const wireframeBtn = document.getElementById('toggleWireframe');
+        const isolatedBtn = document.getElementById('isolatedWireframe');
+        
+        if (this.wireframeMode === 0) {
+            // SOLID mode
+            wireframeBtn.textContent = 'WIREFRAME';
+            wireframeBtn.className = 'px-3 py-2 border-2 border-black bg-[#6C5CE7] hover:bg-[#5a4fcf] text-white text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
+            isolatedBtn.style.display = 'none';
+        } else if (this.wireframeMode === 1) {
+            // WIREFRAME OVERLAY mode
+            wireframeBtn.textContent = 'SOLID';
+            wireframeBtn.className = 'px-3 py-2 border-2 border-black bg-[#FFEB3B] hover:bg-[#FDD835] text-black text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
+            isolatedBtn.style.display = 'inline-block';
+            isolatedBtn.className = 'px-3 py-2 border-2 border-black bg-[#FF6B35] hover:bg-[#e55a2b] text-white text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
+        } else if (this.wireframeMode === 2) {
+            // WIREFRAME ISOLATED mode
+            wireframeBtn.textContent = 'SOLID';
+            wireframeBtn.className = 'px-3 py-2 border-2 border-black bg-[#FFEB3B] hover:bg-[#FDD835] text-black text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
+            isolatedBtn.style.display = 'inline-block';
+            isolatedBtn.className = 'px-3 py-2 border-2 border-black bg-[#2D3748] hover:bg-[#1a202c] text-white text-sm font-bold rounded transition-all duration-150 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]';
         }
         
         // Toggle visibility of mesh stats
         const originalStats = document.getElementById('originalStats');
         const optimizedStats = document.getElementById('optimizedStats');
         if (originalStats && optimizedStats) {
-            if (this.wireframeMode) {
+            if (this.wireframeMode > 0) {
                 originalStats.style.display = 'block';
                 optimizedStats.style.display = 'block';
             } else {
@@ -1103,95 +1200,235 @@ class SmolTextures {
                 optimizedStats.style.display = 'none';
             }
         }
-        
-        // Apply wireframe to both models
+    }
+    
+    applyWireframeMode() {
+        // Apply wireframe mode to both models
         this.setModelWireframe(this.originalModel, this.wireframeMode);
         this.setModelWireframe(this.compressedModel, this.wireframeMode);
     }
     
-    setModelWireframe(model, wireframe) {
+    setModelWireframe(model, wireframeMode) {
         if (!model) return;
         
-        // Blender-like orange wireframe color
-        const wireframeColor = new THREE.Color(0xff7700); // Orange color like Blender
+        // Clean up any existing wireframe overlays first
+        this.removeWireframeOverlays(model);
         
+        if (wireframeMode === 0) {
+            // SOLID mode - restore original materials
+            this.restoreOriginalMaterials(model);
+        } else if (wireframeMode === 1) {
+            // WIREFRAME OVERLAY mode - keep textured mesh + add wireframe on top
+            this.restoreOriginalMaterials(model);
+            this.createWireframeOverlay(model);
+        } else if (wireframeMode === 2) {
+            // WIREFRAME ISOLATED mode - replace materials with wireframe only
+            this.applyIsolatedWireframe(model);
+        }
+    }
+    
+    removeWireframeOverlays(model) {
+        // Remove any existing wireframe overlay meshes
+        const toRemove = [];
+        model.traverse((child) => {
+            if (child.userData.isWireframeOverlay) {
+                toRemove.push(child);
+            }
+        });
+        toRemove.forEach(child => {
+            if (child.parent) {
+                child.parent.remove(child);
+            }
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) child.material.dispose();
+        });
+    }
+    
+    restoreOriginalMaterials(model) {
         model.traverse((child) => {
             if (child.isMesh && child.material) {
                 if (Array.isArray(child.material)) {
-                    // Handle multiple materials
                     child.material.forEach((mat) => {
-                        this.setMaterialWireframe(mat, wireframe, wireframeColor);
+                        this.restoreOriginalMaterial(mat);
                     });
                 } else {
-                    // Handle single material
-                    this.setMaterialWireframe(child.material, wireframe, wireframeColor);
+                    this.restoreOriginalMaterial(child.material);
+                }
+            }
+        });
+    }
+    
+    createWireframeOverlay(model) {
+        const wireframeColor = new THREE.Color(0xff7700);
+        
+        model.traverse((child) => {
+            if (child.isMesh && child.geometry) {
+                let wireframeGeometry;
+                
+                // For skinned meshes, compute the final vertex positions in local space
+                if (child.isSkinnedMesh) {
+                    // Create a temporary geometry with computed skinned positions
+                    const tempGeometry = child.geometry.clone();
+                    
+                    // Ensure matrices are up to date
+                    child.updateMatrixWorld(true);
+                    
+                    // Get the position attribute
+                    const position = tempGeometry.attributes.position;
+                    const skinIndex = tempGeometry.attributes.skinIndex;
+                    const skinWeight = tempGeometry.attributes.skinWeight;
+                    
+                    if (position && skinIndex && skinWeight && child.skeleton) {
+                        const vertex = new THREE.Vector3();
+                        const skinVertex = new THREE.Vector3();
+                        const skinIndices = new THREE.Vector4();
+                        const skinWeights = new THREE.Vector4();
+                        const bindMatrix = new THREE.Matrix4();
+                        const boneMatrix = new THREE.Matrix4();
+                        
+                        // Get inverse of the mesh's world matrix to convert back to local space
+                        const meshInverseMatrix = child.matrixWorld.clone().invert();
+                        
+                        // Create array for transformed positions
+                        const transformedPositions = new Float32Array(position.count * 3);
+                        
+                        for (let i = 0; i < position.count; i++) {
+                            vertex.fromBufferAttribute(position, i);
+                            skinIndices.fromBufferAttribute(skinIndex, i);
+                            skinWeights.fromBufferAttribute(skinWeight, i);
+                            
+                            skinVertex.set(0, 0, 0);
+                            
+                            // Apply bone influences
+                            for (let j = 0; j < 4; j++) {
+                                const weight = skinWeights.getComponent(j);
+                                if (weight > 0) {
+                                    const boneIndex = Math.floor(skinIndices.getComponent(j));
+                                    if (boneIndex >= 0 && boneIndex < child.skeleton.bones.length) {
+                                        bindMatrix.copy(child.skeleton.boneInverses[boneIndex]);
+                                        boneMatrix.multiplyMatrices(child.skeleton.bones[boneIndex].matrixWorld, bindMatrix);
+                                        
+                                        const tempVertex = vertex.clone();
+                                        tempVertex.applyMatrix4(boneMatrix);
+                                        skinVertex.addScaledVector(tempVertex, weight);
+                                    }
+                                }
+                            }
+                            
+                            // Transform back to local space
+                            skinVertex.applyMatrix4(meshInverseMatrix);
+                            
+                            transformedPositions[i * 3] = skinVertex.x;
+                            transformedPositions[i * 3 + 1] = skinVertex.y;
+                            transformedPositions[i * 3 + 2] = skinVertex.z;
+                        }
+                        
+                        // Update geometry with transformed positions
+                        tempGeometry.setAttribute('position', new THREE.BufferAttribute(transformedPositions, 3));
+                        tempGeometry.computeBoundingSphere();
+                    }
+                    
+                    wireframeGeometry = new THREE.WireframeGeometry(tempGeometry);
+                } else {
+                    // For regular meshes, use original geometry
+                    wireframeGeometry = new THREE.WireframeGeometry(child.geometry);
+                }
+                
+                // Create wireframe material - bright and emissive to show on top
+                const wireframeMaterial = new THREE.LineBasicMaterial({
+                    color: wireframeColor,
+                    transparent: false,
+                    depthTest: true,
+                    depthWrite: false // Don't write to depth buffer so it renders on top
+                });
+                
+                // Create wireframe mesh
+                const wireframeMesh = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+                wireframeMesh.userData.isWireframeOverlay = true;
+                
+                // Position wireframe slightly in front to avoid z-fighting
+                wireframeMesh.position.set(0, 0, 0.001);
+                
+                // Add as child to inherit transforms for both skinned and regular meshes
+                child.add(wireframeMesh);
+            }
+        });
+    }
+    
+    applyIsolatedWireframe(model) {
+        model.traverse((child) => {
+            if (child.isMesh && child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach((mat) => {
+                        this.setMaterialIsolatedWireframe(mat);
+                    });
+                } else {
+                    this.setMaterialIsolatedWireframe(child.material);
                 }
             }
         });
     }
 
-    setMaterialWireframe(material, wireframe, wireframeColor) {
-        if (wireframe) {
-            // Store original properties if not already stored
-            if (!material.userData.originalWireframeProps) {
-                material.userData.originalWireframeProps = {
-                    wireframe: material.wireframe,
-                    color: material.color.clone(),
-                    emissive: material.emissive ? material.emissive.clone() : new THREE.Color(0x000000),
-                    map: material.map,
-                    normalMap: material.normalMap,
-                    roughnessMap: material.roughnessMap,
-                    metalnessMap: material.metalnessMap,
-                    aoMap: material.aoMap,
-                    emissiveMap: material.emissiveMap,
-                    transparent: material.transparent,
-                    opacity: material.opacity
-                };
-            }
+    restoreOriginalMaterial(material) {
+        // Restore original properties if they were stored
+        if (material.userData.originalWireframeProps) {
+            const orig = material.userData.originalWireframeProps;
             
-            // Set wireframe mode with bright color and remove texture interference
-            material.wireframe = true;
-            material.color = new THREE.Color(0x000000); // Black base color
-            material.emissive = wireframeColor; // Full emissive color - completely overrides lighting
+            material.wireframe = orig.wireframe;
+            material.color = orig.color;
+            material.emissive = orig.emissive;
+            material.map = orig.map;
+            material.normalMap = orig.normalMap;
+            material.roughnessMap = orig.roughnessMap;
+            material.metalnessMap = orig.metalnessMap;
+            material.aoMap = orig.aoMap;
+            material.emissiveMap = orig.emissiveMap;
+            material.transparent = orig.transparent;
+            material.opacity = orig.opacity;
             
-            // Disable all texture maps that could interfere
-            material.map = null;
-            material.normalMap = null;
-            material.roughnessMap = null;
-            material.metalnessMap = null;
-            material.aoMap = null;
-            material.emissiveMap = null;
-            
-            // Ensure solid appearance
-            material.transparent = false;
-            material.opacity = 1.0;
+            // Clean up stored properties
+            delete material.userData.originalWireframeProps;
             
             // Force material update
             material.needsUpdate = true;
-        } else {
-            // Restore original properties
-            if (material.userData.originalWireframeProps) {
-                const orig = material.userData.originalWireframeProps;
-                
-                material.wireframe = orig.wireframe;
-                material.color = orig.color;
-                material.emissive = orig.emissive;
-                material.map = orig.map;
-                material.normalMap = orig.normalMap;
-                material.roughnessMap = orig.roughnessMap;
-                material.metalnessMap = orig.metalnessMap;
-                material.aoMap = orig.aoMap;
-                material.emissiveMap = orig.emissiveMap;
-                material.transparent = orig.transparent;
-                material.opacity = orig.opacity;
-                
-                // Clean up
-                delete material.userData.originalWireframeProps;
-                
-                // Force material update
-                material.needsUpdate = true;
-            }
         }
+    }
+    
+    setMaterialIsolatedWireframe(material) {
+        const wireframeColor = new THREE.Color(0xff7700); // Orange wireframe color
+        
+        // Store original properties if not already stored
+        if (!material.userData.originalWireframeProps) {
+            material.userData.originalWireframeProps = {
+                wireframe: material.wireframe,
+                color: material.color.clone(),
+                emissive: material.emissive ? material.emissive.clone() : new THREE.Color(0x000000),
+                map: material.map,
+                normalMap: material.normalMap,
+                roughnessMap: material.roughnessMap,
+                metalnessMap: material.metalnessMap,
+                aoMap: material.aoMap,
+                emissiveMap: material.emissiveMap,
+                transparent: material.transparent,
+                opacity: material.opacity
+            };
+        }
+        
+        // Set isolated wireframe mode - pure wireframe only
+        material.wireframe = true;
+        material.color = new THREE.Color(0x000000); // Black base
+        material.emissive = wireframeColor; // Bright orange wireframe
+        material.map = null;
+        material.normalMap = null;
+        material.roughnessMap = null;
+        material.metalnessMap = null;
+        material.aoMap = null;
+        material.emissiveMap = null;
+        material.transparent = false;
+        material.opacity = 1.0;
+        
+        // Force material update
+        material.needsUpdate = true;
     }
 
     closePreview() {
@@ -1205,7 +1442,7 @@ class SmolTextures {
             // Reset model references
             this.originalModel = null;
             this.compressedModel = null;
-            this.wireframeMode = false;
+            this.wireframeMode = 0;
             modal.remove();
         }
     }
@@ -1220,6 +1457,18 @@ class SmolTextures {
             const scene2Container = document.getElementById('scene2Container');
             const loadingOverlay = document.getElementById('loadingOverlay');
             
+            // Wait for the modal to be fully rendered with proper dimensions
+            await new Promise(resolve => {
+                const checkDimensions = () => {
+                    if (container.clientWidth > 0 && container.clientHeight > 0) {
+                        resolve();
+                    } else {
+                        setTimeout(checkDimensions, 10);
+                    }
+                };
+                checkDimensions();
+            });
+            
             // Create two separate renderers
             const renderer1 = new THREE.WebGLRenderer({ 
                 antialias: true,
@@ -1230,13 +1479,16 @@ class SmolTextures {
                 alpha: true
             });
             
-            // Set up both renderers
-            renderer1.setSize(container.clientWidth, container.clientHeight);
+            // Set up both renderers with proper dimensions
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            renderer1.setSize(width, height);
             renderer1.setClearColor(0xf0f0f0, 1);
             renderer1.shadowMap.enabled = true;
             renderer1.shadowMap.type = THREE.PCFSoftShadowMap;
             
-            renderer2.setSize(container.clientWidth, container.clientHeight);
+            renderer2.setSize(width, height);
             renderer2.setClearColor(0xf0f0f0, 1);
             renderer2.shadowMap.enabled = true;
             renderer2.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -1262,8 +1514,9 @@ class SmolTextures {
             const scene2 = new THREE.Scene(); // Compressed
             
             // Create synchronized cameras with better FOV
-            const camera1 = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-            const camera2 = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const aspectRatio = width / height;
+            const camera1 = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 1000);
+            const camera2 = new THREE.PerspectiveCamera(45, aspectRatio, 0.1, 1000);
             
             // Add lights to both scenes
             this.addLights(scene1);
@@ -1340,9 +1593,7 @@ class SmolTextures {
                 console.log('Orbit controls enabled - left slider area');
             };
             
-            // Add hover event listeners to slider elements
-            splitLine.addEventListener('mouseenter', disableControlsOnHover);
-            splitLine.addEventListener('mouseleave', enableControlsOnLeave);
+            // Add hover event listeners to slider handle only
             splitHandle.addEventListener('mouseenter', disableControlsOnHover);
             splitHandle.addEventListener('mouseleave', enableControlsOnLeave);
             
@@ -1395,8 +1646,6 @@ class SmolTextures {
                 }
                 
                 // Remove hover event listeners
-                splitLine.removeEventListener('mouseenter', disableControlsOnHover);
-                splitLine.removeEventListener('mouseleave', enableControlsOnLeave);
                 splitHandle.removeEventListener('mouseenter', disableControlsOnHover);
                 splitHandle.removeEventListener('mouseleave', enableControlsOnLeave);
             };
@@ -1448,76 +1697,345 @@ class SmolTextures {
     async loadThreeJS() {
         if (window.THREE && window.THREE.GLTFLoader && window.THREE.OrbitControls) return;
         
-        // Load Three.js
-        if (!window.THREE) {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
+        // Add import map first to resolve "three" module specifier
+        if (!document.querySelector('script[type="importmap"]')) {
+            const importMap = document.createElement('script');
+            importMap.type = 'importmap';
+            importMap.textContent = JSON.stringify({
+                "imports": {
+                    "three": "https://unpkg.com/three@0.178.0/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@0.178.0/examples/jsm/"
+                }
             });
+            document.head.appendChild(importMap);
+            
+            // Wait a moment for import map to be processed
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        // Load GLTFLoader
-        if (!window.THREE.GLTFLoader) {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
+        // Now load modules using ES module approach
+        const moduleScript = document.createElement('script');
+        moduleScript.type = 'module';
+        moduleScript.textContent = `
+            import * as THREE from 'three';
+            import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+            import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+            
+            // Make available globally - can't modify THREE object, so extend it
+            window.THREE = Object.assign({}, THREE, {
+                GLTFLoader: GLTFLoader,
+                OrbitControls: OrbitControls
             });
-        }
+            
+            // Signal completion with a delay to ensure everything is ready
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('threeJSLoaded'));
+            }, 50);
+        `;
         
-        // Load OrbitControls
-        if (!window.THREE.OrbitControls) {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
+        // Wait for modules to load
+        await new Promise((resolve, reject) => {
+            const loadHandler = () => {
+                window.removeEventListener('threeJSLoaded', loadHandler);
+                // Additional verification that modules are actually available
+                if (window.THREE && window.THREE.GLTFLoader && window.THREE.OrbitControls) {
+                    resolve();
+                } else {
+                    reject(new Error('Three.js modules not properly loaded'));
+                }
+            };
+            
+            const errorHandler = (error) => {
+                console.error('Failed to load Three.js modules:', error);
+                reject(error);
+            };
+            
+            window.addEventListener('threeJSLoaded', loadHandler);
+            moduleScript.onerror = errorHandler;
+            
+            document.head.appendChild(moduleScript);
+            
+            // Timeout fallback
+            setTimeout(() => {
+                reject(new Error('Three.js loading timeout'));
+            }, 10000);
+        });
+        
+        // Don't remove the script element immediately - keep it for module persistence
+        // document.head.removeChild(moduleScript);
     }
 
     addLights(scene) {
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+        // Strong ambient light for base illumination - no shadows
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         
-        // Directional light
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 5, 5);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        scene.add(directionalLight);
+        // Hemisphere light for natural sky/ground lighting
+        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+        hemisphereLight.position.set(0, 10, 0);
+        scene.add(hemisphereLight);
         
-        // Point light
-        const pointLight = new THREE.PointLight(0xffffff, 0.5);
-        pointLight.position.set(-5, 5, -5);
-        scene.add(pointLight);
+        // Multiple directional lights from different angles for even coverage
+        // Main key light (front-top)
+        const keyLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        keyLight.position.set(10, 10, 10);
+        keyLight.castShadow = false; // Disable shadows for inspection
+        scene.add(keyLight);
+        
+        // Fill light (back-left)
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        fillLight.position.set(-10, 5, -5);
+        fillLight.castShadow = false;
+        scene.add(fillLight);
+        
+        // Rim light (right side)
+        const rimLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        rimLight.position.set(5, 5, -10);
+        rimLight.castShadow = false;
+        scene.add(rimLight);
+        
+        // Bottom light to eliminate under-shadows
+        const bottomLight = new THREE.DirectionalLight(0xffffff, 0.3);
+        bottomLight.position.set(0, -10, 0);
+        bottomLight.castShadow = false;
+        scene.add(bottomLight);
+        
+        // Multiple point lights for detailed inspection
+        const pointLights = [
+            { pos: [8, 8, 8], intensity: 0.4 },
+            { pos: [-8, 8, -8], intensity: 0.4 },
+            { pos: [8, -8, -8], intensity: 0.3 },
+            { pos: [-8, -8, 8], intensity: 0.3 },
+            { pos: [0, 0, 10], intensity: 0.3 },
+            { pos: [0, 0, -10], intensity: 0.3 }
+        ];
+        
+        pointLights.forEach(light => {
+            const pointLight = new THREE.PointLight(0xffffff, light.intensity, 100);
+            pointLight.position.set(...light.pos);
+            scene.add(pointLight);
+        });
     }
 
     centerAndScaleModel(model, camera, distance = 5) {
-        // Calculate bounding box
-        const box = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
+        // First pass: basic centering and orientation
+        const initialBox = new THREE.Box3().setFromObject(model);
+        const initialCenter = initialBox.getCenter(new THREE.Vector3());
+        model.position.sub(initialCenter);
         
-        // Center the model
-        model.position.sub(center);
+        // Find the best viewing angle without rotating the model
+        const bestViewAngle = this.findBestViewingAngle(model, initialBox.getSize(new THREE.Vector3()));
         
-        // Scale to fit in view (larger scale for closer viewing)
-        const maxDim = Math.max(size.x, size.y, size.z);
-        const scale = 3 / maxDim;
+        // Keep model rotation at (0,0,0) to preserve proper axes
+        model.rotation.set(0, 0, 0);
+        
+        // Calculate final bounding box (no rotation applied to model)
+        const finalBox = new THREE.Box3().setFromObject(model);
+        const finalCenter = finalBox.getCenter(new THREE.Vector3());
+        const finalSize = finalBox.getSize(new THREE.Vector3());
+        
+        // Perfect centering: move model so its bounding box center is at origin
+        model.position.sub(finalCenter);
+        
+        // Calculate apparent dimensions from the best viewing angle
+        const angle = bestViewAngle;
+        
+        // Project the bounding box dimensions as they appear from the camera angle
+        const apparentWidth = Math.abs(finalSize.x * Math.cos(angle)) + Math.abs(finalSize.z * Math.sin(angle));
+        const apparentHeight = finalSize.y;
+        const apparentDepth = Math.abs(finalSize.x * Math.sin(angle)) + Math.abs(finalSize.z * Math.cos(angle));
+        
+        // Scale based on the dimensions that will actually be visible
+        const targetWidth = 5.0;
+        const targetHeight = 5.0;
+        const scaleX = targetWidth / apparentWidth;
+        const scaleY = targetHeight / apparentHeight;
+        const scale = Math.min(scaleX, scaleY); // Use the smaller scale to ensure it fits
+        
         model.scale.setScalar(scale);
         
-        // Position camera closer to the model
-        camera.position.set(distance, distance * 0.8, distance);
+        // Recalculate bounding box after scaling
+        const scaledBox = new THREE.Box3().setFromObject(model);
+        const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
+        const scaledSize = scaledBox.getSize(new THREE.Vector3());
+        
+        // Final centering adjustment
+        model.position.sub(scaledCenter);
+        
+        // Dynamic camera positioning for optimal framing
+        const scaledApparentWidth = Math.abs(scaledSize.x * Math.cos(angle)) + Math.abs(scaledSize.z * Math.sin(angle));
+        const scaledApparentHeight = scaledSize.y;
+        const cameraDistance = Math.max(scaledApparentWidth, scaledApparentHeight) * 1.1; // Minimal padding
+        
+        camera.position.set(
+            -cameraDistance * Math.sin(angle), // View from calculated best angle
+            cameraDistance * 0.7,
+            cameraDistance * Math.cos(angle)
+        );
+        
         camera.lookAt(0, 0, 0);
+        
+        // Update camera's projection matrix to ensure proper framing
+        camera.updateProjectionMatrix();
+    }
+
+
+
+    findBestViewingAngle(model, size) {
+        // Analyze model to find the best orientation
+        const orientations = this.analyzeModelOrientations(model);
+        
+        // Find the orientation with the most surface area visible from the front
+        let bestOrientation = 0;
+        let maxVisibleArea = 0;
+        
+        for (let i = 0; i < orientations.length; i++) {
+            if (orientations[i] > maxVisibleArea) {
+                maxVisibleArea = orientations[i];
+                bestOrientation = i;
+            }
+        }
+        
+        // Convert orientation to camera angle (instead of rotating model)
+        const cameraAngle = (bestOrientation * Math.PI) / 2;
+        
+        // Add 45-degree offset for better 3D perception
+        return cameraAngle + Math.PI / 4;
+    }
+
+    analyzeModelOrientations(model) {
+        const orientations = [0, 0, 0, 0]; // Front, Right, Back, Left
+        
+        model.traverse((child) => {
+            if (child.isMesh && child.geometry) {
+                const geometry = child.geometry;
+                const positions = geometry.attributes.position;
+                
+                if (positions) {
+                    const vertices = positions.array;
+                    const vertexCount = vertices.length / 3;
+                    
+                    // Sample vertices to estimate surface area in each direction
+                    for (let i = 0; i < vertexCount; i += Math.max(1, Math.floor(vertexCount / 500))) {
+                        const x = vertices[i * 3];
+                        const y = vertices[i * 3 + 1];
+                        const z = vertices[i * 3 + 2];
+                        
+                        // Weight vertices based on their distance from center and direction
+                        const distance = Math.sqrt(x * x + y * y + z * z);
+                        const weight = distance * distance;
+                        
+                        // Determine which direction this vertex faces
+                        if (z > 0) orientations[0] += weight; // Front (+Z)
+                        if (x > 0) orientations[1] += weight; // Right (+X)
+                        if (z < 0) orientations[2] += weight; // Back (-Z)
+                        if (x < 0) orientations[3] += weight; // Left (-X)
+                    }
+                }
+            }
+        });
+        
+        return orientations;
+    }
+
+    async generateThumbnail(file, itemId) {
+        try {
+            // Load Three.js if not already loaded
+            if (!window.THREE) {
+                await this.loadThreeJS();
+            }
+
+            // Create offscreen canvas for thumbnail rendering
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            
+            // Create renderer
+            const renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                antialias: true,
+                alpha: true,
+                preserveDrawingBuffer: true
+            });
+            renderer.setSize(64, 64);
+            renderer.setClearColor(0x000000, 0);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            // Create scene
+            const scene = new THREE.Scene();
+            
+            // Add lighting (same as preview)
+            this.addLights(scene);
+
+            // Create camera
+            const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 1000);
+
+            // Load GLB file
+            const loader = new THREE.GLTFLoader();
+            const arrayBuffer = await file.arrayBuffer();
+            const dataView = new DataView(arrayBuffer);
+            
+            return new Promise((resolve, reject) => {
+                loader.parse(arrayBuffer, '', (gltf) => {
+                    try {
+                        const model = gltf.scene;
+                        scene.add(model);
+                        
+                        // Center and scale the model (same logic as preview)
+                        this.centerAndScaleModel(model, camera);
+                        
+                        // Render the scene
+                        renderer.render(scene, camera);
+                        
+                        // Convert to base64
+                        const dataURL = canvas.toDataURL('image/png');
+                        
+                        // Update the icon in the queue item
+                        this.updateThumbnailIcon(itemId, dataURL);
+                        
+                        // Cleanup
+                        scene.remove(model);
+                        model.traverse((child) => {
+                            if (child.isMesh) {
+                                child.geometry.dispose();
+                                if (child.material) {
+                                    if (Array.isArray(child.material)) {
+                                        child.material.forEach(mat => mat.dispose());
+                                    } else {
+                                        child.material.dispose();
+                                    }
+                                }
+                            }
+                        });
+                        renderer.dispose();
+                        
+                        resolve();
+                    } catch (error) {
+                        console.error('Error rendering thumbnail:', error);
+                        reject(error);
+                    }
+                }, (error) => {
+                    console.error('Error loading GLB for thumbnail:', error);
+                    reject(error);
+                });
+            });
+            
+        } catch (error) {
+            console.error('Error generating thumbnail:', error);
+            // Silently fail - keep the star icon
+        }
+    }
+
+    updateThumbnailIcon(itemId, dataURL) {
+        const iconContainer = document.getElementById(`icon-${itemId}`);
+        if (iconContainer) {
+            iconContainer.innerHTML = `
+                <img src="${dataURL}" alt="Model thumbnail" class="w-full h-full object-cover rounded-sm">
+            `;
+            iconContainer.classList.remove('bg-[#6C5CE7]');
+            iconContainer.classList.add('bg-white');
+        }
     }
 
     setupInteractiveSplitLine(container, updateClipPath, controls, baseCleanup) {
@@ -1557,9 +2075,9 @@ class SmolTextures {
             const deltaX = e.clientX - startX;
             const deltaPercent = (deltaX / containerRect.width) * 100;
             
-            // Calculate new position (clamp between 10% and 90%)
+            // Calculate new position (clamp between 0% and 100%)
             let newLeft = startLeft + deltaPercent;
-            newLeft = Math.max(10, Math.min(90, newLeft));
+            newLeft = Math.max(0, Math.min(100, newLeft));
             
             // Update split line position IMMEDIATELY for instant visual feedback
             splitLine.style.left = `${newLeft}%`;
@@ -1600,8 +2118,7 @@ class SmolTextures {
             e.stopPropagation();
         };
         
-        // Mouse events
-        splitLine.addEventListener('mousedown', handleMouseDown);
+        // Mouse events - only on handle, not the line
         splitHandle.addEventListener('mousedown', handleMouseDown);
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', handleMouseUp);
@@ -1632,7 +2149,6 @@ class SmolTextures {
             });
         };
         
-        splitLine.addEventListener('touchstart', handleTouchStart);
         splitHandle.addEventListener('touchstart', handleTouchStart);
         document.addEventListener('touchmove', handleTouchMove);
         document.addEventListener('touchend', handleTouchEnd);
@@ -1651,11 +2167,9 @@ class SmolTextures {
             document.body.style.userSelect = '';
             
             // Remove event listeners
-            splitLine.removeEventListener('mousedown', handleMouseDown);
             splitHandle.removeEventListener('mousedown', handleMouseDown);
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
-            splitLine.removeEventListener('touchstart', handleTouchStart);
             splitHandle.removeEventListener('touchstart', handleTouchStart);
             document.removeEventListener('touchmove', handleTouchMove);
             document.removeEventListener('touchend', handleTouchEnd);
