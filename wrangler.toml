@@ -1,6 +1,6 @@
 name = "smol-textures"
 main = "src/worker.ts"
-compatibility_date = "2023-11-21"
+compatibility_date = "2025-01-01"
 
 [[r2_buckets]]
 binding = "STATIC_FILES"
