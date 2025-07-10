@@ -1,4 +1,4 @@
-name = "smol-textures"
+name = "smolglb"
 main = "src/worker.ts"
 compatibility_date = "2025-01-01"
 
